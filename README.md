@@ -1,4 +1,4 @@
-# here is my portfolio, hello I am a maricon
+# here is my portfolio
 
 <html lang="en">
 <head>
