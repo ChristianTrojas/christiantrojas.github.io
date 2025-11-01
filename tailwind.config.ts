@@ -1,10 +1,20 @@
+// tailwind.config.ts
 import type { Config } from "tailwindcss";
 
 export default {
-  content: [
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  theme: { extend: {} },
-  plugins: [],
+  theme: {
+    extend: {
+      colors: {
+        steel: "#4B6E91",
+        graphite: "#2F2F2F",
+        soft: "#FAFAFA",
+        amber: "#F0B429",
+        teal: "#4DB6AC",
+      },
+      fontFamily: {
+        sans: ["Poppins", "sans-serif"],
+        serif: ["Merriweather", "serif"],
+      },
+    },
+  },
 } satisfies Config;

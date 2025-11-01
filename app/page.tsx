@@ -1,101 +1,293 @@
-// app/page.tsx
+"use client";
+
+import React, { useEffect } from "react";
+
 export default function Home() {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+
+    let cleaned = false;
+
+    const init = () => {
+      const anime = (window as any).anime;
+      if (!anime) return false;
+
+      // Split hero title (h1) into words while preserving <br />
+      const titleEl = document.getElementById("hero-title");
+      if (titleEl && !(titleEl as HTMLElement).dataset.splitApplied) {
+        const frag = document.createDocumentFragment();
+        Array.from(titleEl.childNodes).forEach((node) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            const text = (node.textContent || "");
+            const parts = text.split(/(\s+)/); // keep spaces
+            parts.forEach((part) => {
+              if (/\s+/.test(part)) {
+                frag.appendChild(document.createTextNode(part));
+              } else if (part) {
+                const clip = document.createElement("span");
+                clip.className = "split-clip";
+                const word = document.createElement("span");
+                word.className = "split-word";
+                word.textContent = part;
+                clip.appendChild(word);
+                frag.appendChild(clip);
+              }
+            });
+          } else if ((node as HTMLElement).nodeName === "BR") {
+            frag.appendChild(document.createElement("br"));
+          }
+        });
+        titleEl.innerHTML = "";
+        titleEl.appendChild(frag);
+        (titleEl as HTMLElement).dataset.splitApplied = "true";
+
+        // Animate words on the title only (one-time reveal, then stay visible)
+        anime({
+          targets: "#hero-title .split-word",
+          translateY: [
+            { value: "100%", duration: 0 },
+            { value: "0%", duration: 900, easing: "easeOutCubic" },
+          ],
+          delay: anime.stagger(180),
+          loop: false,
+          complete: () => {
+            document.querySelectorAll("#hero-title .split-word").forEach((el) => {
+              (el as HTMLElement).style.transform = "none";
+            });
+          },
+        });
+      }
+
+      // Hero entrance
+      anime.timeline({ easing: "easeOutExpo" })
+        .add({ targets: "#hero-title", opacity: [0, 1], translateY: [16, 0], duration: 700 })
+        .add({ targets: '[data-animate="hero-sub"]', opacity: [0, 1], translateY: [12, 0], duration: 600 }, 100)
+        .add({ targets: '[data-animate="hero-cta"]', opacity: [0, 1], translateY: [8, 0], duration: 500 }, 200)
+        .add({ targets: "#hero-orbit", opacity: [0, 1], scale: [0.92, 1], duration: 800 }, 0);
+
+      // Scroll reveal for cards
+      const reveal = (selector: string) => {
+        const items = document.querySelectorAll(selector);
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                anime({
+                  targets: entry.target as Element,
+                  opacity: [0, 1],
+                  translateY: [12, 0],
+                  duration: 600,
+                  easing: "easeOutQuad",
+                });
+                io.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.15 }
+        );
+        items.forEach((el) => io.observe(el));
+        return io;
+      };
+
+      const io1 = reveal('[data-animate="project-card"]');
+      const io2 = reveal('[data-animate="process-card"]');
+
+      // Cleanup observers on unmount
+      return () => {
+        io1 && io1.disconnect();
+        io2 && io2.disconnect();
+      };
+    };
+
+    // Try immediately; if not ready, wait for script load
+    const cleanup = init();
+    if (cleanup) {
+      return () => {
+        cleaned = true;
+        typeof cleanup === "function" && cleanup();
+      };
+    }
+
+    const script = document.querySelector('script[src*="anime.min.js"]');
+    const onLoad = () => {
+      if (!cleaned) {
+        const laterCleanup = init();
+        if (typeof laterCleanup === "function") {
+          window.addEventListener("beforeunload", () => laterCleanup());
+        }
+      }
+    };
+    if (script) script.addEventListener("load", onLoad, { once: true });
+
+    return () => {
+      cleaned = true;
+      if (script) script.removeEventListener("load", onLoad as any);
+    };
+  }, []);
   return (
-    <main className="min-h-screen bg-white text-gray-900">
-      {/* Nav */}
-      <header className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
-        <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
-          <span className="font-semibold">Christian Torres</span>
-          <nav className="space-x-6 text-sm">
-            <a href="#about" className="hover:opacity-70">About</a>
-            <a href="#projects" className="hover:opacity-70">Projects</a>
-            <a href="#process" className="hover:opacity-70">Process</a>
-            <a href="#contact" className="hover:opacity-70">Contact</a>
+    <main className="min-h-screen bg-[var(--color-soft)] text-[var(--color-graphite)] font-sans">
+      {/* ===== Navbar ===== */}
+      <header className="sticky top-0 z-10 bg-[var(--color-soft)]/90 backdrop-blur border-b border-[var(--color-steel)]/20">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+          <span className="font-semibold tracking-wide text-[var(--color-steel)] text-lg">
+            Christian Torres
+          </span>
+          <nav className="space-x-6 text-sm font-medium text-[var(--color-graphite)]/80">
+            <a href="#about" className="hover:text-[var(--color-steel)] transition">About</a>
+            <a href="#projects" className="hover:text-[var(--color-steel)] transition">Projects</a>
+            <a href="#process" className="hover:text-[var(--color-steel)] transition">Process</a>
+            <a href="#contact" className="hover:text-[var(--color-steel)] transition">Contact</a>
           </nav>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="border-b">
-        <div className="mx-auto max-w-6xl px-6 py-20 grid gap-10 md:grid-cols-2 items-center">
+      {/* ===== Hero Section ===== */}
+      <section className="border-b border-[var(--color-steel)]/10">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center px-6 py-24">
           <div>
-            <h1 className="text-4xl md:text-5xl font-semibold leading-tight">
-              Engineering Precision,<br/>Designed for Curiosity.
+            <h1 id="hero-title" className="text-4xl md:text-5xl font-semibold leading-tight text-[var(--color-steel)]">
+              Engineering Precision, <br /> Designed for Curiosity.
             </h1>
-            <p className="mt-4 text-gray-600 max-w-prose">
-              Mechanical engineer blending structure, clarity, and innovation to translate ideas into
-              practical, elegant systems.
+            <p
+              id="hero-tagline"
+              data-animate="hero-sub"
+              className="mt-6 text-[var(--color-graphite)]/80 font-serif max-w-prose"
+            >
+              I’m a mechanical engineer blending structure, creativity, and analysis — building
+              systems that turn imagination into functional design.
             </p>
-            <div className="mt-6 flex gap-3">
-              <a href="#projects" className="px-4 py-2 rounded-lg border bg-black text-white">View Projects</a>
-              <a href="#contact" className="px-4 py-2 rounded-lg border">Contact</a>
+            <div data-animate="hero-cta" className="mt-8 flex flex-wrap gap-3">
+              <a
+                href="#projects"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-steel)] text-[var(--color-soft)] hover:bg-[var(--color-amber)] hover:text-[var(--color-graphite)] transition"
+              >
+                <span className="material-symbols-outlined text-sm">build_circle</span>
+                View Projects
+              </a>
+              <a
+                href="#contact"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--color-steel)] text-[var(--color-steel)] hover:bg-[var(--color-soft)]/60 transition"
+              >
+                <span className="material-symbols-outlined text-sm">mail</span>
+                Contact
+              </a>
             </div>
           </div>
-          <div className="h-56 md:h-72 rounded-2xl border grid place-items-center">
-            {/* Placeholder for rotating geometric motif */}
-            <span className="text-gray-400 text-sm">Rotational Motif / Portrait</span>
+          <div className="flex justify-center items-center">
+            <div id="hero-orbit" className="w-64 h-64 md:w-80 md:h-80 rounded-full border-[6px] border-[var(--color-steel)]/20 flex items-center justify-center relative">
+              <div className="absolute w-full h-full border-[1px] border-[var(--color-steel)]/30 rounded-full animate-spin-slow"></div>
+              <span className="material-symbols-outlined text-[var(--color-amber)] text-6xl">
+                precision_manufacturing
+              </span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* About */}
-      <section id="about" className="border-b">
-        <div className="mx-auto max-w-4xl px-6 py-16">
-          <h2 className="text-2xl font-semibold">About</h2>
-          <p className="mt-4 text-gray-700">
-            I’m a curious and detail-oriented mechanical engineer with a passion for problem-solving,
-            precision, and continuous improvement. I see engineering as a bridge between imagination
-            and reality.
+      {/* ===== About Section ===== */}
+      <section id="about" className="border-b border-[var(--color-steel)]/10">
+        <div className="max-w-5xl mx-auto px-6 py-20">
+          <h2 className="text-3xl font-semibold text-[var(--color-steel)] mb-4">About</h2>
+          <p className="text-[var(--color-graphite)]/85 leading-relaxed font-serif">
+            I’m a curious and detail-oriented mechanical engineer with a passion for design,
+            problem-solving, and continuous improvement. I enjoy transforming ideas into practical
+            solutions through creativity, precision, and analytical thinking. I value structure and
+            clarity, but also exploration — constantly learning new technologies and methods that
+            expand my engineering perspective.
           </p>
         </div>
       </section>
 
-      {/* Projects */}
-      <section id="projects" className="border-b">
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <div className="flex items-end justify-between">
-            <h2 className="text-2xl font-semibold">Selected Projects</h2>
-            <a className="text-sm underline" href="#">See all</a>
+      {/* ===== Projects Section ===== */}
+      <section id="projects" className="border-b border-[var(--color-steel)]/10">
+        <div className="max-w-6xl mx-auto px-6 py-20">
+          <div className="flex justify-between items-end">
+            <h2 className="text-3xl font-semibold text-[var(--color-steel)]">Projects</h2>
+            <a href="#" className="text-sm underline text-[var(--color-graphite)]/70 hover:text-[var(--color-steel)]">
+              View all
+            </a>
           </div>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({length:6}).map((_,i)=>(
-              <article key={i} className="rounded-2xl border overflow-hidden group">
-                <div className="aspect-video bg-gray-100 grid place-items-center">
-                  <span className="text-gray-400 text-sm">Image / Render</span>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-medium">Project Title</h3>
-                  <p className="text-sm text-gray-600">Short description of challenge → result.</p>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Process */}
-      <section id="process" className="border-b">
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <h2 className="text-2xl font-semibold">Process</h2>
-          <div className="mt-6 grid gap-4 sm:grid-cols-4">
-            {["Problem","Design","Prototype","Analysis"].map((step)=>(
-              <div key={step} className="rounded-xl border p-4 text-center">
-                <div className="font-medium">{step}</div>
-                <p className="text-xs text-gray-600 mt-2">Notes about this stage.</p>
+          <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="rounded-2xl overflow-hidden border border-[var(--color-steel)]/20 hover:border-[var(--color-steel)]/50 transition"
+                data-animate="project-card"
+              >
+                <div className="aspect-video bg-[var(--color-graphite)]/5 grid place-items-center">
+                  <span className="material-symbols-outlined text-[var(--color-graphite)]/40 text-4xl">
+                    design_services
+                  </span>
+                </div>
+                <div className="p-5">
+                  <h3 className="font-semibold mb-1">Project Title</h3>
+                  <p className="text-sm text-[var(--color-graphite)]/70">
+                    A brief description of the engineering challenge and the approach used to
+                    achieve a precise, innovative outcome.
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Contact */}
-      <section id="contact">
-        <div className="mx-auto max-w-3xl px-6 py-16">
-          <h2 className="text-2xl font-semibold">Get in touch</h2>
-          <p className="mt-4 text-gray-700">Let’s collaborate. I’m open to research, engineering roles, and design projects.</p>
-          <div className="mt-6 flex gap-3">
-            <a href="mailto:christiantrojas97@gmail.com" className="px-4 py-2 rounded-lg border bg-black text-white">Email</a>
-            <a href="https://www.linkedin.com/in/christian-torres997" className="px-4 py-2 rounded-lg border">LinkedIn</a>
+      {/* ===== Process Section ===== */}
+      <section id="process" className="border-b border-[var(--color-steel)]/10">
+        <div className="max-w-6xl mx-auto px-6 py-20">
+          <h2 className="text-3xl font-semibold text-[var(--color-steel)] mb-8">Process</h2>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {["Problem", "Design", "Prototype", "Analysis"].map((step) => (
+              <div
+                key={step}
+                className="text-center border border-[var(--color-steel)]/20 rounded-xl p-6 hover:border-[var(--color-steel)]/50 transition"
+                data-animate="process-card"
+              >
+                <span className="material-symbols-outlined text-[var(--color-amber)] text-4xl mb-3 block">
+                  schema
+                </span>
+                <h3 className="font-semibold text-lg">{step}</h3>
+                <p className="text-sm text-[var(--color-graphite)]/70 mt-2 font-serif">
+                  Notes or visuals describing how each stage contributes to precision and innovation.
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== Contact Section ===== */}
+      <section id="contact" className="bg-[var(--color-steel)] text-[var(--color-soft)]">
+        <div className="max-w-3xl mx-auto px-6 py-20 text-center">
+          <h2 className="text-3xl font-semibold mb-4">Let’s Connect</h2>
+          <p className="text-[var(--color-soft)]/80 max-w-prose mx-auto font-serif">
+            Interested in collaboration, research, or learning more about my work? Feel free to
+            reach out anytime.
+          </p>
+          <div className="mt-6 flex justify-center gap-4">
+            <a
+              href="mailto:christiantrojas97@gmail.com"
+              className="flex items-center gap-2 px-5 py-3 rounded-lg bg-[var(--color-amber)] text-[var(--color-graphite)] hover:bg-[var(--color-soft)] transition"
+              aria-label="Email Christian"
+              title="Email Christian"
+            >
+              <span className="material-symbols-outlined text-base" aria-hidden="true">mail</span>
+              Email
+            </a>
+            <a
+              href="https://www.linkedin.com/in/christian-torres997"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-5 py-3 rounded-lg border border-[var(--color-soft)] text-[var(--color-soft)] hover:bg-[var(--color-soft)] hover:text-[var(--color-steel)] transition"
+              aria-label="Open LinkedIn profile"
+              title="Open LinkedIn profile"
+            >
+              <span className="material-symbols-outlined text-base" aria-hidden="true">link</span>
+              LinkedIn
+            </a>
           </div>
         </div>
       </section>
