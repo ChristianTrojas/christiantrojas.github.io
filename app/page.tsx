@@ -92,7 +92,46 @@ export default function Home() {
       };
 
       const io1 = reveal('[data-animate="project-card"]');
-      const io2 = reveal('[data-animate="process-card"]');
+
+      // Staggered animation for Process section
+      const revealProcess = () => {
+        const section = document.getElementById('process');
+        if (!section) return null;
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                // Cards cascade in
+                anime({
+                  targets: '#process [data-animate="process-item"]',
+                  opacity: [0, 1],
+                  translateY: [16, 0],
+                  scale: [0.98, 1],
+                  delay: (anime as any).stagger(120),
+                  duration: 650,
+                  easing: 'easeOutCubic',
+                });
+                // Icons pop slightly after
+                anime({
+                  targets: '#process [data-animate="process-icon"]',
+                  opacity: [0, 1],
+                  scale: [0.6, 1],
+                  delay: (anime as any).stagger(120, { start: 180 }),
+                  duration: 550,
+                  easing: 'easeOutBack',
+                });
+                // Path/milestones removed per request; keep simple card/icon reveal only
+                io.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.2 }
+        );
+        io.observe(section);
+        return io;
+      };
+
+      const io2 = revealProcess();
 
       // Cleanup observers on unmount
       return () => {
@@ -167,6 +206,29 @@ export default function Home() {
         "Ran CFD simulations to analyze airflow through mechanical components, improving aerodynamic behavior and energy efficiency through iterative analysis and design refinement.",
       icon: "water_drop",
       image: "/projects/fluid-dynamics-simulation.jpg",
+    },
+  ];
+
+  const processSteps = [
+    {
+      title: "Understand",
+      desc: "Define the problem and constraints with clarity.",
+      icon: "search",
+    },
+    {
+      title: "Conceptualize",
+      desc: "Sketch and model multiple ideas to explore solutions.",
+      icon: "stylus_note",
+    },
+    {
+      title: "Analyze",
+      desc: "Use FEA/CFD to validate mechanical and structural performance.",
+      icon: "science",
+    },
+    {
+      title: "Refine",
+      desc: "Optimize details for functionality, safety, and efficiency.",
+      icon: "tune",
     },
   ];
   return (
@@ -258,22 +320,20 @@ export default function Home() {
       <section id="process" className="border-b border-[var(--color-steel)]/10">
         <div className="max-w-6xl mx-auto px-6 py-20">
           <h2 className="text-3xl font-semibold text-[var(--color-steel)] mb-8">Process</h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {["Problem", "Design", "Prototype", "Analysis"].map((step) => (
-              <div
-                key={step}
-                className="text-center border border-[var(--color-steel)]/20 rounded-xl p-6 hover:border-[var(--color-steel)]/50 transition"
-                data-animate="process-card"
-              >
-                <span className="material-symbols-outlined text-[var(--color-amber)] text-4xl mb-3 block">
-                  schema
-                </span>
-                <h3 className="font-semibold text-lg">{step}</h3>
-                <p className="text-sm text-[var(--color-graphite)]/70 mt-2 font-serif">
-                  Notes or visuals describing how each stage contributes to precision and innovation.
-                </p>
-              </div>
-            ))}
+          <div className="mt-10">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {processSteps.map((s) => (
+                <div
+                  key={s.title}
+                  className="text-center border border-[var(--color-steel)]/20 rounded-xl p-6 hover:border-[var(--color-steel)]/50 transition opacity-0 will-change-transform"
+                  data-animate="process-item"
+                >
+                  <span className="material-symbols-outlined text-[var(--color-amber)] text-4xl mb-3 block opacity-0" data-animate="process-icon">{s.icon}</span>
+                  <h3 className="font-semibold text-lg">{s.title}</h3>
+                  <p className="text-sm text-[var(--color-graphite)]/70 mt-2 font-serif">{s.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
