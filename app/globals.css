@@ -50,6 +50,34 @@ body {
   will-change: transform;
 }
 
+/* Flip card effect (hover/click) */
+.flip-card {
+  perspective: 1000px;
+  position: relative;
+}
+.flip-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 600ms ease;
+}
+.flip-card:hover .flip-inner,
+.flip-card:focus-within .flip-inner,
+.flip-card.is-flipped .flip-inner {
+  transform: rotateY(180deg);
+}
+.flip-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-front,
+.flip-back {
+  position: absolute;
+  inset: 0;
+}
+.flip-back {
+  transform: rotateY(180deg);
+}
+
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   .animate-spin-slow {

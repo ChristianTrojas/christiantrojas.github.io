@@ -2,8 +2,8 @@ import "./globals.css";
 import Script from "next/script";
 
 export const metadata = {
-  title: "Christian Torres | Mechanical Engineer Portfolio",
-  description: "Engineering precision, designed for curiosity.",
+  title: "chrisaut | Chris Torres Portfolio",
+  description: "Mechanical design, simulation, and visualization by Chris Torres.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

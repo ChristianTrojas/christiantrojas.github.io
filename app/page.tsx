@@ -126,13 +126,51 @@ export default function Home() {
       if (script) script.removeEventListener("load", onLoad as any);
     };
   }, []);
+
+  type Project = {
+    title: string;
+    role: string;
+    description: string;
+    icon: string;
+  };
+
+  const projects: Project[] = [
+    {
+      title: "Structural Design Optimization – Haug Metal Structures",
+      role: "Mechanical & Structural Designer",
+      description:
+        "Designed and analyzed steel assemblies following CSA S16-1 standards, optimizing load-bearing performance using FEA and CAD. Produced detailed structural layouts to improve efficiency and manufacturability across industrial applications.",
+      icon: "architecture",
+    },
+    {
+      title: "3D Highway Infrastructure Model – Urban Design Visualization",
+      role: "Mechanical & 3D Modeling Engineer",
+      description:
+        "Built a full-scale digital model of a highway system to simulate traffic flow, structural geometry, and environmental integration — demonstrating spatial planning, large-scale modeling, and technical visualization.",
+      icon: "map",
+    },
+    {
+      title: "Quantum Computing and Analog Mechanics Concept",
+      role: "Research & Concept Development Engineer",
+      description:
+        "Explored parallels between quantum computing logic and analog mechanical systems, translating superposition and state representation into mechanical analogs that mirror computational logic through motion and geometry.",
+      icon: "science",
+    },
+    {
+      title: "Fluid Dynamics Simulation – Personal Research",
+      role: "Mechanical Analyst",
+      description:
+        "Ran CFD simulations to analyze airflow through mechanical components, improving aerodynamic behavior and energy efficiency through iterative analysis and design refinement.",
+      icon: "water_drop",
+    },
+  ];
   return (
     <main className="min-h-screen bg-[var(--color-soft)] text-[var(--color-graphite)] font-sans">
       {/* ===== Navbar ===== */}
       <header className="sticky top-0 z-10 bg-[var(--color-soft)]/90 backdrop-blur border-b border-[var(--color-steel)]/20">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <span className="font-semibold tracking-wide text-[var(--color-steel)] text-lg">
-            Christian Torres
+            chrisaut
           </span>
           <nav className="space-x-6 text-sm font-medium text-[var(--color-graphite)]/80">
             <a href="#about" className="hover:text-[var(--color-steel)] transition">About</a>
@@ -145,10 +183,10 @@ export default function Home() {
 
       {/* ===== Hero Section ===== */}
       <section className="border-b border-[var(--color-steel)]/10">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center px-6 py-24">
+        <div className="relative max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center px-6 py-24">
           <div>
             <h1 id="hero-title" className="text-4xl md:text-5xl font-semibold leading-tight text-[var(--color-steel)]">
-              Engineering Precision, <br /> Designed for Curiosity.
+              Hi, I am Chris Torres
             </h1>
             <p
               id="hero-tagline"
@@ -175,14 +213,7 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <div className="flex justify-center items-center">
-            <div id="hero-orbit" className="w-64 h-64 md:w-80 md:h-80 rounded-full border-[6px] border-[var(--color-steel)]/20 flex items-center justify-center relative">
-              <div className="absolute w-full h-full border-[1px] border-[var(--color-steel)]/30 rounded-full animate-spin-slow"></div>
-              <span className="material-symbols-outlined text-[var(--color-amber)] text-6xl">
-                precision_manufacturing
-              </span>
-            </div>
-          </div>
+          <div className="hidden md:block" />
         </div>
       </section>
 
@@ -211,25 +242,8 @@ export default function Home() {
           </div>
 
           <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="rounded-2xl overflow-hidden border border-[var(--color-steel)]/20 hover:border-[var(--color-steel)]/50 transition"
-                data-animate="project-card"
-              >
-                <div className="aspect-video bg-[var(--color-graphite)]/5 grid place-items-center">
-                  <span className="material-symbols-outlined text-[var(--color-graphite)]/40 text-4xl">
-                    design_services
-                  </span>
-                </div>
-                <div className="p-5">
-                  <h3 className="font-semibold mb-1">Project Title</h3>
-                  <p className="text-sm text-[var(--color-graphite)]/70">
-                    A brief description of the engineering challenge and the approach used to
-                    achieve a precise, innovative outcome.
-                  </p>
-                </div>
-              </div>
+            {projects.map((p) => (
+              <ProjectCard key={p.title} p={p} />
             ))}
           </div>
         </div>
@@ -292,5 +306,57 @@ export default function Home() {
         </div>
       </section>
     </main>
+  );
+}
+
+function ProjectCard({ p }: { p: { title: string; role: string; description: string; icon: string } }) {
+  const [flipped, setFlipped] = React.useState(false);
+
+  const toggle = (e?: React.MouseEvent | React.KeyboardEvent) => {
+    if (e) e.stopPropagation();
+    setFlipped((v) => !v);
+  };
+
+  const onKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      toggle(e);
+    }
+  };
+
+  return (
+    <div
+      className={`flip-card rounded-2xl overflow-hidden border border-[var(--color-steel)]/20 hover:border-[var(--color-steel)]/50 transition ${
+        flipped ? "is-flipped" : ""
+      }`}
+      data-animate="project-card"
+      role="button"
+      tabIndex={0}
+      aria-pressed={flipped}
+      aria-label={flipped ? "Show project front" : "Show project details"}
+      onClick={toggle}
+      onKeyDown={onKey}
+    >
+      <div className="flip-inner min-h-[340px]">
+        {/* Front */}
+        <div className="flip-face flip-front bg-[var(--color-soft)] flex flex-col h-full">
+          <div className="h-40 bg-[var(--color-graphite)]/5 grid place-items-center">
+            <span className="material-symbols-outlined text-[var(--color-graphite)]/40 text-4xl">{p.icon}</span>
+          </div>
+          <div className="p-5 flex-1 flex flex-col justify-start">
+            <h3 className="font-semibold mb-1 leading-snug">{p.title}</h3>
+            <p className="text-xs text-[var(--color-graphite)]/60">{p.role}</p>
+          </div>
+        </div>
+        {/* Back */}
+        <div className="flip-face flip-back bg-[var(--color-soft)] flex flex-col h-full">
+          <div className="p-5 flex-1 flex flex-col">
+            <h3 className="font-semibold mb-2 leading-snug">{p.title}</h3>
+            <p className="text-xs text-[var(--color-graphite)]/60 mb-2">{p.role}</p>
+            <p className="text-sm text-[var(--color-graphite)]/75 font-serif">{p.description}</p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
