@@ -132,6 +132,7 @@ export default function Home() {
     role: string;
     description: string;
     icon: string;
+    image: string; // path under /public
   };
 
   const projects: Project[] = [
@@ -141,6 +142,7 @@ export default function Home() {
       description:
         "Designed and analyzed steel assemblies following CSA S16-1 standards, optimizing load-bearing performance using FEA and CAD. Produced detailed structural layouts to improve efficiency and manufacturability across industrial applications.",
       icon: "architecture",
+      image: "/projects/structural-design-optimization-haug-metal-structures.jpg",
     },
     {
       title: "3D Highway Infrastructure Model – Urban Design Visualization",
@@ -148,6 +150,7 @@ export default function Home() {
       description:
         "Built a full-scale digital model of a highway system to simulate traffic flow, structural geometry, and environmental integration — demonstrating spatial planning, large-scale modeling, and technical visualization.",
       icon: "map",
+      image: "/projects/3d-highway-infrastructure-model.jpg",
     },
     {
       title: "Quantum Computing and Analog Mechanics Concept",
@@ -155,6 +158,7 @@ export default function Home() {
       description:
         "Explored parallels between quantum computing logic and analog mechanical systems, translating superposition and state representation into mechanical analogs that mirror computational logic through motion and geometry.",
       icon: "science",
+      image: "/projects/quantum-computing-analog-mechanics.jpg",
     },
     {
       title: "Fluid Dynamics Simulation – Personal Research",
@@ -162,6 +166,7 @@ export default function Home() {
       description:
         "Ran CFD simulations to analyze airflow through mechanical components, improving aerodynamic behavior and energy efficiency through iterative analysis and design refinement.",
       icon: "water_drop",
+      image: "/projects/fluid-dynamics-simulation.jpg",
     },
   ];
   return (
@@ -340,8 +345,13 @@ function ProjectCard({ p }: { p: { title: string; role: string; description: str
       <div className="flip-inner min-h-[340px]">
         {/* Front */}
         <div className="flip-face flip-front bg-[var(--color-soft)] flex flex-col h-full">
-          <div className="h-40 bg-[var(--color-graphite)]/5 grid place-items-center">
-            <span className="material-symbols-outlined text-[var(--color-graphite)]/40 text-4xl">{p.icon}</span>
+          <div className="aspect-video bg-[var(--color-graphite)]/5 overflow-hidden">
+            <img
+              src={p.image}
+              alt={p.title}
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
           </div>
           <div className="p-5 flex-1 flex flex-col justify-start">
             <h3 className="font-semibold mb-1 leading-snug">{p.title}</h3>
