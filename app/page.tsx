@@ -197,7 +197,7 @@ export default function Home() {
       description:
         "Explored parallels between quantum computing logic and analog mechanical systems, translating superposition and state representation into mechanical analogs that mirror computational logic through motion and geometry.",
       icon: "science",
-      image: "/projects/quantum-computing-analog-mechanics.jpg",
+      image: "/projects/quantum-computing-analog-mechanics.webp",
     },
     {
       title: "Fluid Dynamics Simulation – Personal Research",
@@ -205,7 +205,7 @@ export default function Home() {
       description:
         "Ran CFD simulations to analyze airflow through mechanical components, improving aerodynamic behavior and energy efficiency through iterative analysis and design refinement.",
       icon: "water_drop",
-      image: "/projects/fluid-dynamics-simulation.jpg",
+      image: "/projects/fluid-dynamics-simulation.webp",
     },
   ];
 
