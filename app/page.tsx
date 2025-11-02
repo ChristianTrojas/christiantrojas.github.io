@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function Home() {
+  const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -239,13 +240,36 @@ export default function Home() {
           <span className="font-semibold tracking-wide text-[var(--color-steel)] text-lg">
             chrisaut
           </span>
-          <nav className="space-x-6 text-sm font-medium text-[var(--color-graphite)]/80">
+          {/* Desktop nav */}
+          <nav className="hidden md:flex space-x-6 text-sm font-medium text-[var(--color-graphite)]/80">
             <a href="#about" className="hover:text-[var(--color-steel)] transition">About</a>
             <a href="#projects" className="hover:text-[var(--color-steel)] transition">Projects</a>
             <a href="#process" className="hover:text-[var(--color-steel)] transition">Process</a>
             <a href="#contact" className="hover:text-[var(--color-steel)] transition">Contact</a>
           </nav>
+          {/* Mobile hamburger */}
+          <button
+            type="button"
+            aria-label="Toggle menu"
+            aria-controls="mobile-menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
+            className="md:hidden inline-flex items-center justify-center p-2 rounded-lg text-[var(--color-graphite)] hover:text-[var(--color-steel)] focus:outline-none"
+          >
+            <span className="material-symbols-outlined">{menuOpen ? "close" : "menu"}</span>
+          </button>
         </div>
+        {/* Mobile menu panel */}
+        {menuOpen && (
+          <nav id="mobile-menu" className="md:hidden border-t border-[var(--color-steel)]/20">
+            <div className="max-w-6xl mx-auto px-6 py-3 flex flex-col text-sm font-medium text-[var(--color-graphite)]/80">
+              <a href="#about" onClick={() => setMenuOpen(false)} className="py-2 hover:text-[var(--color-steel)] transition">About</a>
+              <a href="#projects" onClick={() => setMenuOpen(false)} className="py-2 hover:text-[var(--color-steel)] transition">Projects</a>
+              <a href="#process" onClick={() => setMenuOpen(false)} className="py-2 hover:text-[var(--color-steel)] transition">Process</a>
+              <a href="#contact" onClick={() => setMenuOpen(false)} className="py-2 hover:text-[var(--color-steel)] transition">Contact</a>
+            </div>
+          </nav>
+        )}
       </header>
 
       {/* ===== Hero Section ===== */}
@@ -253,7 +277,7 @@ export default function Home() {
         <div className="relative max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center px-6 py-24">
           <div>
             <h1 id="hero-title" className="text-4xl md:text-5xl font-semibold leading-tight text-[var(--color-steel)]">
-              Hi, I am Chris Torres
+              Hi, I am Christian
             </h1>
             <p
               id="hero-tagline"
