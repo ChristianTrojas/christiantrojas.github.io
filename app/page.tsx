@@ -314,7 +314,7 @@ export default function Home() {
   );
 }
 
-function ProjectCard({ p }: { p: { title: string; role: string; description: string; icon: string } }) {
+function ProjectCard({ p }: { p: { title: string; role: string; description: string; icon: string; image: string } }) {
   const [flipped, setFlipped] = React.useState(false);
 
   const toggle = (e?: React.MouseEvent | React.KeyboardEvent) => {
